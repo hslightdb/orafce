@@ -1,0 +1,102 @@
+create table oracle.test_fkey(b  serial primary key);
+create table oracle.test_orafce (a  serial, b int REFERENCES test_fkey(b),primary key (a));
+select * from user_tab_columns where table_name in ('TEST_ORAFCE','PG_VIEWS') order by table_name;
+ table_name  | column_name | data_type | data_length | data_precision | data_scale | nullable | column_id | data_upgraded | table_schema 
+-------------+-------------+-----------+-------------+----------------+------------+----------+-----------+---------------+--------------
+ PG_VIEWS    | DEFINITION  | TEXT      |             |                |            | YES      |         4 | NO            | PG_CATALOG
+ PG_VIEWS    | SCHEMANAME  | NAME      |             |                |            | YES      |         1 | NO            | PG_CATALOG
+ PG_VIEWS    | VIEWNAME    | NAME      |             |                |            | YES      |         2 | NO            | PG_CATALOG
+ PG_VIEWS    | VIEWOWNER   | NAME      |             |                |            | YES      |         3 | NO            | PG_CATALOG
+ TEST_ORAFCE | A           | INTEGER   |          32 |             32 |          0 | NO       |         1 | YES           | ORACLE
+ TEST_ORAFCE | B           | INTEGER   |          32 |             32 |          0 | YES      |         2 | YES           | ORACLE
+(6 rows)
+
+select * from user_tables where table_name in('TEST_ORAFCE','PG_VIEWS') order by table_name;
+ table_name  
+-------------
+ TEST_ORAFCE
+(1 row)
+
+select * from user_cons_columns where table_name in('TEST_ORAFCE','PG_VIEWS') order by table_name;
+ constraint_name  | column_name | table_name  
+------------------+-------------+-------------
+ TEST_ORAFCE_PKEY | A           | TEST_ORAFCE
+(1 row)
+
+select * from user_constraints where table_name in('TEST_ORAFCE','PG_VIEWS') order by table_name;
+  constraint_name   |    index_name    | constraint_type | table_name  | r_constraint_name 
+--------------------+------------------+-----------------+-------------+-------------------
+ TEST_ORAFCE_PKEY   | TEST_ORAFCE_PKEY | P               | TEST_ORAFCE | 
+ TEST_ORAFCE_B_FKEY | TEST_FKEY_PKEY   | R               | TEST_ORAFCE | TEST_FKEY_PKEY
+(2 rows)
+
+select  product,version from product_component_version where product = 'orafce' order by product;
+ product | version 
+---------+---------
+ orafce  | 3.18
+(1 row)
+
+select object_name, subject_name, object_type, created, last_ddl_time, status, namespace is null from user_objects where object_name = 'NVARCHAR2' order by object_name;
+ object_name | subject_name | object_type | created | last_ddl_time | status | ?column? 
+-------------+--------------+-------------+---------+---------------+--------+----------
+ NVARCHAR2   |              | FUNCTION    |         |               | VALID  | f
+(1 row)
+
+select * from user_procedures where object_name='DECODE' order by object_name;
+ object_name 
+-------------
+ DECODE
+ DECODE
+ DECODE
+ DECODE
+ DECODE
+ DECODE
+ DECODE
+ DECODE
+ DECODE
+ DECODE
+ DECODE
+ DECODE
+(12 rows)
+
+select line, text, name, type from user_source where name = 'DECODE' order by name;
+ line |     text      |  name  |   type   
+------+---------------+--------+----------
+    1 | binary_decode | DECODE | FUNCTION
+    1 | ora_decode2   | DECODE | FUNCTION
+    1 | ora_decode2   | DECODE | FUNCTION
+    1 | ora_decode2   | DECODE | FUNCTION
+    1 | ora_decode2   | DECODE | FUNCTION
+    1 | ora_decode2   | DECODE | FUNCTION
+    1 | ora_decode2   | DECODE | FUNCTION
+    1 | ora_decode2   | DECODE | FUNCTION
+    1 | ora_decode2   | DECODE | FUNCTION
+    1 | ora_decode2   | DECODE | FUNCTION
+    1 | ora_decode2   | DECODE | FUNCTION
+    1 | ora_decode2   | DECODE | FUNCTION
+    1 | ora_decode2   | DECODE | FUNCTION
+(13 rows)
+
+select view_name from user_views where view_name = 'USER_VIEWS' order by view_name;
+ view_name  
+------------
+ USER_VIEWS
+(1 row)
+
+select * from user_ind_columns where table_name in('TEST_ORAFCE') order by table_name;
+ column_name |    index_name    | table_name  
+-------------+------------------+-------------
+ A           | TEST_ORAFCE_PKEY | TEST_ORAFCE
+(1 row)
+
+select owner, segment_name, segment_type, tablespace_name from dba_segments where owner='ORACLE' order by segment_name;
+ owner  |   segment_name   | segment_type | tablespace_name 
+--------+------------------+--------------+-----------------
+ ORACLE | TEST_FKEY        | TABLE        | 
+ ORACLE | TEST_FKEY_PKEY   | INDEX        | 
+ ORACLE | TEST_ORAFCE      | TABLE        | 
+ ORACLE | TEST_ORAFCE_PKEY | INDEX        | 
+(4 rows)
+
+drop table oracle.test_orafce;
+drop table oracle.test_fkey;

@@ -1,6 +1,9 @@
 #include "postgres.h"
 #include <stdlib.h>
 #include <locale.h>
+#include <access/htup_details.h>
+#include <catalog/pg_cast.h>
+#include <parser/parse_coerce.h>
 #include "catalog/pg_operator.h"
 #include "catalog/pg_type.h"
 #include "fmgr.h"
@@ -17,6 +20,23 @@
 #include "utils/syscache.h"
 #include "orafce.h"
 #include "builtins.h"
+#include "miscadmin.h"
+#include "access/detoast.h"
+
+/* lightdb add 2022/05/30 for 202204156325 */
+#include "utils/array.h"
+#include "nodes/execnodes.h"
+
+
+// lightdb add 2022/03/18 for 202203036069
+static bool
+param_is_null(PG_FUNCTION_ARGS, int argnum)
+{
+	Datum arg = PG_GETARG_DATUM(argnum);
+	Oid argtypid = get_fn_expr_argtype(fcinfo->flinfo, argnum);
+	bool isnull = PG_ARGISNULL(argnum);
+	return lt_ora_is_null(argtypid,isnull,arg);
+}
 
 /*
  * Source code for nlssort is taken from postgresql-nls-string
@@ -35,7 +55,6 @@ ora_lnnvl(PG_FUNCTION_ARGS)
 {
 	if (PG_ARGISNULL(0))
 		PG_RETURN_BOOL(true);
-
 	PG_RETURN_BOOL(!PG_GETARG_BOOL(0));
 }
 
@@ -75,14 +94,15 @@ ora_concat(PG_FUNCTION_ARGS)
 
 
 PG_FUNCTION_INFO_V1(ora_nvl);
-
+// lightdb add 2022/03/18 for 202203036069
 Datum
 ora_nvl(PG_FUNCTION_ARGS)
 {
-	if (!PG_ARGISNULL(0))
+
+	if (!param_is_null(fcinfo,0))
 		PG_RETURN_DATUM(PG_GETARG_DATUM(0));
 
-	if (!PG_ARGISNULL(1))
+	if (!param_is_null(fcinfo,1))
 		PG_RETURN_DATUM(PG_GETARG_DATUM(1));
 
 	PG_RETURN_NULL();
@@ -378,6 +398,120 @@ ora_decode(PG_FUNCTION_ARGS)
 		PG_RETURN_DATUM(PG_GETARG_DATUM(retarg));
 }
 
+
+PG_FUNCTION_INFO_V1(ora_decode2);
+
+/*
+ * decode2(expr, search, result, [search, result], ..., [default])
+ *
+ * decode2 is implemented according to oracle decode. It supports number and
+ * character 'result' arguments, compares 'expr' and 'search' in cstring
+ * format, returns the type of first 'result'.
+ * 
+ * Error is raised if return type is numeric and the select 'result' can not
+ * be converted to numeric.
+ *
+ * See https://docs.oracle.com/cd/B19306_01/server.102/b14200/functions040.htm for details.
+ */
+Datum
+ora_decode2(PG_FUNCTION_ARGS)
+{
+	int		nargs;
+	int		i;
+	int		retarg;
+	Oid		result_oid;
+	Oid		oid;
+	Oid		typOutput;
+	bool	typIsVarlena;
+	FmgrInfo   *fio = NULL;
+
+	/* default value is last arg or NULL. */
+	nargs = PG_NARGS();
+	if (nargs % 2 == 0)
+	{
+		retarg = nargs - 1;
+		nargs -= 1;		/* ignore the last argument */
+	}
+	else
+		retarg = -1;	/* NULL */
+
+	if (PG_ARGISNULL(0))
+	{
+		for (i = 1; i < nargs; i += 2)
+		{
+			if (PG_ARGISNULL(i))
+			{
+				retarg = i + 1;
+				break;
+			}
+		}
+	}
+	else
+	{
+		Oid		expr_oid = get_fn_expr_argtype(fcinfo->flinfo, 0);
+		char   *expr_cstr;
+
+		fio = (FmgrInfo *)MemoryContextAlloc(fcinfo->flinfo->fn_mcxt, sizeof(FmgrInfo));
+
+		getTypeOutputInfo(expr_oid, &typOutput, &typIsVarlena);
+		fmgr_info_cxt(typOutput, fio, fcinfo->flinfo->fn_mcxt);
+		expr_cstr = OutputFunctionCall(fio, PG_GETARG_DATUM(0));
+
+		for (i = 1; i < nargs; i += 2)
+		{
+			char *cur_search_cstr;
+
+			if (PG_ARGISNULL(i))
+				continue;
+			
+			oid = get_fn_expr_argtype(fcinfo->flinfo, i);
+			getTypeOutputInfo(oid, &typOutput, &typIsVarlena);
+			fmgr_info_cxt(typOutput, fio, fcinfo->flinfo->fn_mcxt);
+			cur_search_cstr = OutputFunctionCall(fio, PG_GETARG_DATUM(i));
+
+			/*elog(INFO, "expr %s, cur_search_cstr, %s", expr_cstr, cur_search_cstr);*/
+			if (expr_cstr && cur_search_cstr && strcmp(expr_cstr, cur_search_cstr) == 0)
+			{
+				retarg = i + 1;
+				break;
+			}
+		}
+	}
+
+	if (retarg < 0 || PG_ARGISNULL(retarg))
+		PG_RETURN_NULL();
+	else
+	{
+		oid = get_fn_expr_argtype(fcinfo->flinfo, retarg);
+		result_oid = get_fn_expr_argtype(fcinfo->flinfo, 2);
+
+		if (oid == result_oid)
+		{
+			PG_RETURN_DATUM(PG_GETARG_DATUM(retarg));
+		}
+		else
+		{
+			char   *result_cstr;
+			Datum	result;
+			Oid		typIOParam;
+
+			if (fio == NULL)
+				fio = (FmgrInfo *)MemoryContextAlloc(fcinfo->flinfo->fn_mcxt, sizeof(FmgrInfo));
+
+			getTypeOutputInfo(oid, &typOutput, &typIsVarlena);
+			fmgr_info_cxt(typOutput, fio, fcinfo->flinfo->fn_mcxt);
+			result_cstr = OutputFunctionCall(fio, PG_GETARG_DATUM(retarg));
+			/*elog(INFO, "result_cstr %s", result_cstr);*/
+
+			getTypeInputInfo(result_oid, &typOutput, &typIOParam);
+			fmgr_info_cxt(typOutput, fio, fcinfo->flinfo->fn_mcxt);
+			result = InputFunctionCall(fio, result_cstr, typIOParam, -1);
+
+			PG_RETURN_DATUM(result);
+		}
+	}
+}
+
 Oid
 equality_oper_funcid(Oid argtype)
 {
@@ -556,4 +690,228 @@ ora_get_status(PG_FUNCTION_ARGS)
 #else
 	PG_RETURN_TEXT_P(cstring_to_text("Production"));
 #endif
+}
+
+/* lightdb add 2022/06/06 for 202204156325 */
+PG_FUNCTION_INFO_V1(array_indexby_length);
+Datum
+array_indexby_length(PG_FUNCTION_ARGS)
+{
+	ArrayType *v;
+	int		   reqdim;
+	int		  *dimv = NULL;
+	int		   result = 0;
+
+	if (PG_ARGISNULL(0))
+	{
+		PG_RETURN_INT32(0);
+	}
+
+	v = PG_GETARG_ARRAYTYPE_P(0);
+	reqdim = PG_GETARG_INT32(1);
+
+	/* Sanity check: does it look like an array at all */
+	if (ARR_NDIM(v) <= 0 || ARR_NDIM(v) > MAXDIM)
+	{
+		PG_RETURN_INT32(result);
+	}
+
+	/* Sanity check: was the requested dim valid */
+	if (reqdim <= 0 || reqdim > ARR_NDIM(v))
+	{
+		PG_RETURN_INT32(result);
+	}
+
+	dimv = ARR_DIMS(v);
+
+	result = dimv[reqdim - 1];
+
+	PG_RETURN_INT32(result);
+}
+
+PG_FUNCTION_INFO_V1(array_indexby_delete);
+Datum
+array_indexby_delete(PG_FUNCTION_ARGS)
+{
+	ArrayType *v;
+	ArrayType *array = NULL;
+	ExprContext *context;
+
+	if (PG_ARGISNULL(0))
+	{
+		PG_RETURN_NULL();
+	}
+
+	v = PG_GETARG_ARRAYTYPE_P(0);
+	context = (ExprContext *)fcinfo->context;
+
+	if (context != NULL && !OidIsValid(context->tableOfInfo->tableOfIndexType))
+	{
+		ereport(ERROR,
+				(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
+				 errmsg("array_indexby_delete must be call in procedure")));
+	}
+
+	if (context->tableOfInfo->tableOfIndex)
+	{
+		array = construct_empty_array(ARR_ELEMTYPE(v));
+		deleteTableOfIndexElement(context->tableOfInfo->tableOfIndex);
+		PG_RETURN_ARRAYTYPE_P(array);
+	}
+
+	PG_RETURN_NULL();
+}
+
+PG_FUNCTION_INFO_V1(array_varchar_first);
+Datum
+array_varchar_first(PG_FUNCTION_ARGS)
+{
+	ArrayType  *v;
+	Datum		first_datum;
+	ExprContext *context;
+
+	if (PG_ARGISNULL(0))
+		PG_RETURN_NULL();
+
+	v = PG_GETARG_ARRAYTYPE_P(0);
+	context = (ExprContext *)fcinfo->context;
+
+	/* Sanity check: does it look like an array at all */
+	if (ARR_NDIM(v) <= 0 || ARR_NDIM(v) > MAXDIM)
+	{
+		PG_RETURN_NULL();
+	}
+
+	if (context == NULL || context->tableOfInfo->tableOfIndex == NULL)
+	{
+		ereport(ERROR,
+				(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
+				 errmsg("array_varchar_first must be call in procedure")));
+	}
+	/* turn varchar index */
+	first_datum = tableOfIndexVarcharFirstValue(context->tableOfInfo->tableOfIndex);
+
+	if (first_datum == (Datum)0)
+	{
+		PG_RETURN_NULL();
+	}
+	else
+	{
+		PG_RETURN_VARCHAR_P(first_datum);
+	}
+}
+
+PG_FUNCTION_INFO_V1(array_varchar_last);
+Datum
+array_varchar_last(PG_FUNCTION_ARGS)
+{
+	ArrayType  *v;
+	Datum		last_datum;
+	ExprContext *context;
+
+	if (PG_ARGISNULL(0))
+		PG_RETURN_NULL();
+
+	v = PG_GETARG_ARRAYTYPE_P(0);
+	context = (ExprContext *)fcinfo->context;
+
+	/* Sanity check: does it look like an array at all */
+	if (ARR_NDIM(v) <= 0 || ARR_NDIM(v) > MAXDIM)
+	{
+		PG_RETURN_NULL();
+	}
+
+	if (context == NULL || context->tableOfInfo->tableOfIndex == NULL)
+	{
+		ereport(ERROR,
+				(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
+				 errmsg("array_varchar_last must be call in procedure")));
+	}
+
+	/* turn varchar index */
+	last_datum = tableOfIndexVarcharLastValue(context->tableOfInfo->tableOfIndex);
+
+	if (last_datum == (Datum)0)
+	{
+		PG_RETURN_NULL();
+	}
+	else
+	{
+		PG_RETURN_VARCHAR_P(last_datum);
+	}
+}
+
+PG_FUNCTION_INFO_V1(array_integer_last);
+Datum
+array_integer_last(PG_FUNCTION_ARGS)
+{
+	ArrayType   *v;
+	HTAB		*table_index;
+	Datum		last_datum;
+	ExprContext *context;
+
+	if (PG_ARGISNULL(0))
+		PG_RETURN_NULL();
+
+	v = PG_GETARG_ARRAYTYPE_P(0);
+	context = (ExprContext *)fcinfo->context;
+
+	/* Sanity check: does it look like an array at all */
+	if (ARR_NDIM(v) <= 0 || ARR_NDIM(v) > MAXDIM)
+	{
+		PG_RETURN_NULL();
+	}
+
+	if (context == NULL || context->tableOfInfo->tableOfIndex == NULL)
+	{
+		ereport(ERROR,
+				(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
+				 errmsg("array_integer_last must be call in procedure")));
+	}
+
+	table_index = context->tableOfInfo->tableOfIndex;
+	if (hash_get_num_entries(table_index) == 0)
+	{
+		PG_RETURN_NULL();
+	}
+	last_datum = tableOfIndexIntegerLastValue(table_index);
+	PG_RETURN_INT32(last_datum);
+}
+
+PG_FUNCTION_INFO_V1(array_integer_first);
+Datum
+array_integer_first(PG_FUNCTION_ARGS)
+{
+	HTAB	   *table_index;
+	Datum		first_datum;
+	ArrayType  *v;
+	ExprContext *context;
+
+	if (PG_ARGISNULL(0))
+		PG_RETURN_NULL();
+
+	v = PG_GETARG_ARRAYTYPE_P(0);
+	context = (ExprContext *)fcinfo->context;
+
+	/* Sanity check: does it look like an array at all */
+	if (ARR_NDIM(v) <= 0 || ARR_NDIM(v) > MAXDIM)
+	{
+		PG_RETURN_NULL();
+	}
+
+	if (context == NULL || context->tableOfInfo->tableOfIndex == NULL)
+	{
+		ereport(ERROR,
+				(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
+				 errmsg("array_integer_first must be call in procedure")));
+	}
+
+	table_index = context->tableOfInfo->tableOfIndex;
+	if (hash_get_num_entries(table_index) == 0)
+	{
+		PG_RETURN_NULL();
+	}
+	
+	first_datum = tableOfIndexIntegerFirstValue(table_index);
+	PG_RETURN_INT32(first_datum);
 }

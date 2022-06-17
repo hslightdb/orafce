@@ -1,4 +1,4 @@
-/* orafce--3.15.sql */
+/* orafce--3.16.sql */
 
 -- complain if script is sourced in psql, rather than via CREATE EXTENSION
 \echo Use "CREATE EXTENSION orafce" to load this file. \quit
@@ -537,8 +537,8 @@ COMMENT ON FUNCTION dbms_output.get_lines(OUT text[], INOUT int4) IS 'Get lines 
 
 -- others functions
 
-CREATE FUNCTION nvl(anyelement, anyelement)
-RETURNS anyelement
+CREATE FUNCTION nvl(anycompatible, anycompatible)
+RETURNS anycompatible
 AS 'MODULE_PATHNAME','ora_nvl'
 LANGUAGE C IMMUTABLE;
 
@@ -548,275 +548,66 @@ AS 'MODULE_PATHNAME','ora_nvl2'
 LANGUAGE C IMMUTABLE;
 COMMENT ON FUNCTION nvl2(anyelement, anyelement, anyelement) IS '';
 
-CREATE FUNCTION public.decode(anyelement, anyelement, text)
-RETURNS text
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, text, text)
-RETURNS text
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, text, anyelement, text)
-RETURNS text
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, text, anyelement, text, text)
-RETURNS text
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, text, anyelement, text, anyelement, text)
-RETURNS text
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, text, anyelement, text, anyelement, text, text)
-RETURNS text
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, bpchar)
-RETURNS bpchar
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, bpchar, bpchar)
-RETURNS bpchar
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, bpchar, anyelement, bpchar)
-RETURNS bpchar
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, bpchar, anyelement, bpchar, bpchar)
-RETURNS bpchar
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, bpchar, anyelement, bpchar, anyelement, bpchar)
-RETURNS bpchar
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, bpchar, anyelement, bpchar, anyelement, bpchar, bpchar)
-RETURNS bpchar
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, integer)
-RETURNS integer
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, integer, integer)
-RETURNS integer
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, integer, anyelement, integer)
-RETURNS integer
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, integer, anyelement, integer, integer)
-RETURNS integer
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, integer, anyelement, integer, anyelement, integer)
-RETURNS integer
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, integer, anyelement, integer, anyelement, integer, integer)
-RETURNS integer
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, bigint)
-RETURNS bigint
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, bigint, bigint)
-RETURNS bigint
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, bigint, anyelement, bigint)
-RETURNS bigint
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, bigint, anyelement, bigint, bigint)
-RETURNS bigint
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, bigint, anyelement, bigint, anyelement, bigint)
-RETURNS bigint
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, bigint, anyelement, bigint, anyelement, bigint, bigint)
-RETURNS bigint
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, numeric)
+CREATE FUNCTION public.decode("any", "any", numeric)
 RETURNS numeric
-AS 'MODULE_PATHNAME', 'ora_decode'
+AS 'MODULE_PATHNAME', 'ora_decode2'
 LANGUAGE C IMMUTABLE;
 
-CREATE FUNCTION public.decode(anyelement, anyelement, numeric, numeric)
+CREATE FUNCTION public.decode("any", "any", numeric, variadic "any")
 RETURNS numeric
-AS 'MODULE_PATHNAME', 'ora_decode'
+AS 'MODULE_PATHNAME', 'ora_decode2'
 LANGUAGE C IMMUTABLE;
 
-CREATE FUNCTION public.decode(anyelement, anyelement, numeric, anyelement, numeric)
-RETURNS numeric
-AS 'MODULE_PATHNAME', 'ora_decode'
+CREATE FUNCTION public.decode("any", "any", text)
+RETURNS text
+AS 'MODULE_PATHNAME', 'ora_decode2'
 LANGUAGE C IMMUTABLE;
 
-CREATE FUNCTION public.decode(anyelement, anyelement, numeric, anyelement, numeric, numeric)
-RETURNS numeric
-AS 'MODULE_PATHNAME', 'ora_decode'
+CREATE FUNCTION public.decode("any", "any", text, variadic "any")
+RETURNS text
+AS 'MODULE_PATHNAME', 'ora_decode2'
 LANGUAGE C IMMUTABLE;
 
-CREATE FUNCTION public.decode(anyelement, anyelement, numeric, anyelement, numeric, anyelement, numeric)
-RETURNS numeric
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, numeric, anyelement, numeric, anyelement, numeric, numeric)
-RETURNS numeric
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, date)
+CREATE FUNCTION public.decode("any", "any", date)
 RETURNS date
-AS 'MODULE_PATHNAME', 'ora_decode'
+AS 'MODULE_PATHNAME', 'ora_decode2'
 LANGUAGE C IMMUTABLE;
 
-CREATE FUNCTION public.decode(anyelement, anyelement, date, date)
+CREATE FUNCTION public.decode("any", "any", date, variadic "any")
 RETURNS date
-AS 'MODULE_PATHNAME', 'ora_decode'
+AS 'MODULE_PATHNAME', 'ora_decode2'
 LANGUAGE C IMMUTABLE;
 
-CREATE FUNCTION public.decode(anyelement, anyelement, date, anyelement, date)
-RETURNS date
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, date, anyelement, date, date)
-RETURNS date
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, date, anyelement, date, anyelement, date)
-RETURNS date
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, date, anyelement, date, anyelement, date, date)
-RETURNS date
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, time)
+CREATE FUNCTION public.decode("any", "any", time)
 RETURNS time
-AS 'MODULE_PATHNAME', 'ora_decode'
+AS 'MODULE_PATHNAME', 'ora_decode2'
 LANGUAGE C IMMUTABLE;
 
-CREATE FUNCTION public.decode(anyelement, anyelement, time, time)
+CREATE FUNCTION public.decode("any", "any", time, variadic "any")
 RETURNS time
-AS 'MODULE_PATHNAME', 'ora_decode'
+AS 'MODULE_PATHNAME', 'ora_decode2'
 LANGUAGE C IMMUTABLE;
 
-CREATE FUNCTION public.decode(anyelement, anyelement, time, anyelement, time)
-RETURNS time
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, time, anyelement, time, time)
-RETURNS time
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, time, anyelement, time, anyelement, time)
-RETURNS time
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, time, anyelement, time, anyelement, time, time)
-RETURNS time
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, timestamp)
+CREATE FUNCTION public.decode("any", "any", timestamp)
 RETURNS timestamp
-AS 'MODULE_PATHNAME', 'ora_decode'
+AS 'MODULE_PATHNAME', 'ora_decode2'
 LANGUAGE C IMMUTABLE;
 
-CREATE FUNCTION public.decode(anyelement, anyelement, timestamp, timestamp)
+CREATE FUNCTION public.decode("any", "any", timestamp, variadic "any")
 RETURNS timestamp
-AS 'MODULE_PATHNAME', 'ora_decode'
+AS 'MODULE_PATHNAME', 'ora_decode2'
 LANGUAGE C IMMUTABLE;
 
-CREATE FUNCTION public.decode(anyelement, anyelement, timestamp, anyelement, timestamp)
-RETURNS timestamp
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, timestamp, anyelement, timestamp, timestamp)
-RETURNS timestamp
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, timestamp, anyelement, timestamp, anyelement, timestamp)
-RETURNS timestamp
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, timestamp, anyelement, timestamp, anyelement, timestamp, timestamp)
-RETURNS timestamp
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, timestamptz)
+CREATE FUNCTION public.decode("any", "any", timestamptz)
 RETURNS timestamptz
-AS 'MODULE_PATHNAME', 'ora_decode'
+AS 'MODULE_PATHNAME', 'ora_decode2'
 LANGUAGE C IMMUTABLE;
 
-CREATE FUNCTION public.decode(anyelement, anyelement, timestamptz, timestamptz)
+CREATE FUNCTION public.decode("any", "any", timestamptz, variadic "any")
 RETURNS timestamptz
-AS 'MODULE_PATHNAME', 'ora_decode'
+AS 'MODULE_PATHNAME', 'ora_decode2'
 LANGUAGE C IMMUTABLE;
 
-CREATE FUNCTION public.decode(anyelement, anyelement, timestamptz, anyelement, timestamptz)
-RETURNS timestamptz
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, timestamptz, anyelement, timestamptz, timestamptz)
-RETURNS timestamptz
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, timestamptz, anyelement, timestamptz, anyelement, timestamptz)
-RETURNS timestamptz
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
-
-CREATE FUNCTION public.decode(anyelement, anyelement, timestamptz, anyelement, timestamptz, anyelement, timestamptz, timestamptz)
-RETURNS timestamptz
-AS 'MODULE_PATHNAME', 'ora_decode'
-LANGUAGE C IMMUTABLE;
 
 
 CREATE SCHEMA dbms_pipe;
@@ -1596,16 +1387,10 @@ AS 'MODULE_PATHNAME','dbms_utility_format_call_stack0'
 LANGUAGE C VOLATILE;
 COMMENT ON FUNCTION dbms_utility.format_call_stack() IS 'Return formated call stack';
 
-CREATE FUNCTION dbms_utility.get_time()
-RETURNS int
-AS 'MODULE_PATHNAME','dbms_utility_get_time'
-LANGUAGE C VOLATILE;
-COMMENT ON FUNCTION dbms_utility.get_time() IS 'Returns the number of hundredths of seconds that have elapsed since point in time';
-
 CREATE SCHEMA plvlex;
 
 CREATE FUNCTION plvlex.tokens(IN str text, IN skip_spaces bool, IN qualified_names bool,
-OUT pos int, OUT token text, OUT code int, OUT class text, OUT separator text, OUT mod text)
+OUT pos int, OUT token text, OUT code int, OUT class text, OUT "separator" text, OUT mod text)
 RETURNS SETOF RECORD
 AS 'MODULE_PATHNAME','plvlex_tokens'
 LANGUAGE C IMMUTABLE STRICT;
@@ -3371,33 +3156,33 @@ LANGUAGE 'c' STRICT IMMUTABLE;
 
 -- Oracle system views
 create view oracle.user_tab_columns as
-    select table_name,
-           column_name,
-           data_type,
+    select upper(table_name) as table_name,
+           upper(column_name) as column_name,
+           upper(data_type) as data_type,
            coalesce(character_maximum_length, numeric_precision) AS data_length,
            numeric_precision AS data_precision,
            numeric_scale AS data_scale,
            is_nullable AS nullable,
            ordinal_position AS column_id,
            is_updatable AS data_upgraded,
-           table_schema
+           upper(table_schema) as table_schema
     from information_schema.columns;
 
 create view oracle.user_tables as
-    select table_name
+    select upper(table_name) as table_name
       from information_schema.tables
      where table_type = 'BASE TABLE';
 
 create view oracle.user_cons_columns as
-   select constraint_name, column_name, table_name
+   select upper(constraint_name) as constraint_name, upper(column_name) as column_name, upper(table_name) as table_name
      from information_schema.constraint_column_usage ;
 
 create view oracle.user_constraints as
-    select conname as constraint_name,
-           conindid::regclass as index_name,
+    select upper(conname) as constraint_name,
+           upper(conindid::regclass::text) as index_name,
            case contype when 'p' then 'P' when 'f' then 'R' end as constraint_type,
-           conrelid::regclass as table_name,
-           case contype when 'f' then (select conname
+           upper(conrelid::regclass::text) as table_name,
+           case contype when 'f' then (select upper(conname)
                                          from pg_constraint c2
                                         where contype = 'p' and c2.conindid = c1.conindid)
                                       end as r_constraint_name
@@ -3415,7 +3200,7 @@ create view oracle.product_component_version as
       from pg_extension;
 
 create view oracle.user_objects as
-    select relname as object_name,
+    select upper(relname) as object_name,
            null::text as subject_name,
            c.oid as object_id,
            case relkind when 'r' then 'TABLE'
@@ -3435,28 +3220,28 @@ create view oracle.user_objects as
      where relkind not in  ('t','c')
        and nspname not in ('pg_toast','pg_catalog','information_schema')
     union all
-    select tgname, null, t.oid, 'TRIGGER',null, null,'VALID', relnamespace
+    select upper(tgname) as tgname, null, t.oid, 'TRIGGER',null, null,'VALID', relnamespace
       from pg_trigger t join pg_class c on t.tgrelid = c.oid
      where not tgisinternal
     union all
-    select proname, null, p.oid, 'FUNCTION', null, null, 'VALID', pronamespace
+    select upper(proname) as proname, null, p.oid, 'FUNCTION', null, null, 'VALID', pronamespace
       from pg_proc p join pg_namespace n on p.pronamespace = n.oid
      where nspname not in ('pg_toast','pg_catalog','information_schema') order by 1;
 
 create view oracle.user_procedures as
-    select proname as object_name
+    select upper(proname)  as object_name
       from pg_proc p join pg_namespace n on p.pronamespace = n.oid
        and nspname <> 'pg_catalog';
 
 create view oracle.user_source as
     select row_number() over (partition by oid) as line, *
       from ( select oid, unnest(string_to_array(prosrc, e'\n')) as text,
-                    proname as name, 'FUNCTION'::text as type
+                    upper(proname) as name, 'FUNCTION'::text as type
                from pg_proc) s;
 
 create view oracle.user_views
-   as select c.relname as view_name,
-  pg_catalog.pg_get_userbyid(c.relowner) as owner
+   as select upper(c.relname) as view_name,
+             upper(pg_catalog.pg_get_userbyid(c.relowner)) as owner
 from pg_catalog.pg_class c
      left join pg_catalog.pg_namespace n on n.oid = c.relnamespace
 where c.relkind in ('v','')
@@ -3466,7 +3251,7 @@ where c.relkind in ('v','')
   and pg_catalog.pg_table_is_visible(c.oid);
 
 create view oracle.user_ind_columns as
-    select attname as column_name, c1.relname as index_name, c2.relname as table_name
+    select upper(attname) as column_name, upper(c1.relname) as index_name, upper(c2.relname) as table_name
       from (select unnest(indkey) attno, indexrelid, indrelid from pg_index) s
            join pg_attribute on attno = attnum and attrelid = indrelid
            join pg_class c1 on indexrelid = c1.oid
@@ -3476,8 +3261,8 @@ create view oracle.user_ind_columns as
 
 CREATE VIEW oracle.dba_segments AS
 SELECT
-    pg_namespace.nspname AS owner,
-    pg_class.relname AS segment_name,
+    upper(pg_namespace.nspname) AS owner,
+    upper(pg_class.relname) AS segment_name,
     CASE
         WHEN pg_class.relkind = 'r' THEN CAST( 'TABLE' AS VARCHAR( 18 ) )
         WHEN pg_class.relkind = 'i' THEN CAST( 'INDEX' AS VARCHAR( 18 ) )
@@ -3488,7 +3273,7 @@ SELECT
         WHEN pg_class.relkind = 'v' THEN CAST( 'VIEW' AS VARCHAR( 18 ) )
         ELSE CAST( pg_class.relkind AS VARCHAR( 18 ) )
     END AS segment_type,
-    spcname AS tablespace_name,
+    upper(spcname) AS tablespace_name,
     relfilenode AS header_file,
     NULL::oid AS header_block,
     pg_relation_size( pg_class.oid ) AS bytes,
@@ -3522,21 +3307,6 @@ CREATE OR REPLACE FUNCTION oracle.lpad(numeric, int, int)
 RETURNS text AS $$
 SELECT pg_catalog.lpad($1::text,$2,$3::text)
 $$ LANGUAGE sql IMMUTABLE STRICT;
-
-CREATE OR REPLACE FUNCTION oracle.nvl(bigint, int)
-RETURNS bigint AS $$
-SELECT coalesce($1, $2)
-$$ LANGUAGE sql IMMUTABLE;
-
-CREATE OR REPLACE FUNCTION oracle.nvl(numeric, int)
-RETURNS numeric AS $$
-SELECT coalesce($1, $2)
-$$ LANGUAGE sql IMMUTABLE;
-
-CREATE OR REPLACE FUNCTION oracle.nvl(int, int)
-RETURNS int AS $$
-SELECT coalesce($1, $2)
-$$ LANGUAGE sql IMMUTABLE;
 
 CREATE OR REPLACE FUNCTION oracle.numtodsinterval(double precision, text)
 RETURNS interval AS $$
@@ -4189,3 +3959,63 @@ END;
 $$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION substring_index(varchar, varchar, integer)
+RETURNS varchar AS $$
+DECLARE
+tokens varchar[];
+length integer ;
+indexnum integer;
+BEGIN
+tokens := pg_catalog.string_to_array($1, $2);
+length := pg_catalog.array_upper(tokens, 1);
+indexnum := length - ($3 * -1) + 1;
+IF $3 >= 0 THEN
+RETURN pg_catalog.array_to_string(tokens[1:$3], $2);
+ELSE
+RETURN pg_catalog.array_to_string(tokens[indexnum:length], $2);
+END IF;
+END;
+$$ IMMUTABLE STRICT LANGUAGE PLPGSQL;
+
+/* lightdb add 2022/06/06 for 202204156325 */
+CREATE FUNCTION pg_catalog.array_indexby_length(anyarray, integer)
+RETURNS integer
+AS 'MODULE_PATHNAME', 'array_indexby_length'
+LANGUAGE C IMMUTABLE;
+COMMENT ON FUNCTION pg_catalog.array_indexby_length(anyarray, integer) IS '';
+
+CREATE FUNCTION pg_catalog.array_indexby_delete(anyarray)
+RETURNS ANYARRAY
+AS 'MODULE_PATHNAME', 'array_indexby_delete'
+LANGUAGE C IMMUTABLE;
+COMMENT ON FUNCTION pg_catalog.array_indexby_delete(anyarray) IS '';
+
+CREATE FUNCTION pg_catalog.array_varchar_first(anyarray)
+RETURNS varchar
+AS 'MODULE_PATHNAME', 'array_varchar_first'
+LANGUAGE C IMMUTABLE;
+COMMENT ON FUNCTION pg_catalog.array_varchar_first(anyarray) IS '';
+
+CREATE FUNCTION pg_catalog.array_varchar_last(anyarray)
+RETURNS varchar
+AS 'MODULE_PATHNAME', 'array_varchar_last'
+LANGUAGE C IMMUTABLE;
+COMMENT ON FUNCTION pg_catalog.array_varchar_last(anyarray) IS '';
+
+CREATE FUNCTION pg_catalog.array_integer_first(anyarray)
+RETURNS int4
+AS 'MODULE_PATHNAME', 'array_integer_first'
+LANGUAGE C IMMUTABLE;
+COMMENT ON FUNCTION pg_catalog.array_integer_first(anyarray) IS '';
+
+CREATE FUNCTION pg_catalog.array_integer_last(anyarray)
+RETURNS int4
+AS 'MODULE_PATHNAME', 'array_integer_last'
+LANGUAGE C IMMUTABLE;
+COMMENT ON FUNCTION pg_catalog.array_integer_last(anyarray) IS '';
+
+--  LightDB add, 2022/6/16, for 202204266775
+--  type priority :
+--  numeric > float8 > float4 > int8 > int4 > int2 > text > varchar > varchar2 > nvarchar2 > char
+ALTER TYPE varchar2 set (priority = 34);
+ALTER TYPE nvarchar2 set (priority = 33);

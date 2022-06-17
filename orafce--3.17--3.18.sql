@@ -1,0 +1,15 @@
+create schema if not  exists lt_catalog;
+alter function nvl set schema  lt_catalog;
+alter view public.dual set schema  lt_catalog;
+alter function public.decode("any", "any", numeric) set schema  lt_catalog;
+alter function public.decode("any", "any", numeric, variadic "any") set schema lt_catalog;
+alter function public.decode("any", "any", text) set schema lt_catalog;
+alter function public.decode("any", "any", text, variadic "any") set schema lt_catalog;
+alter function public.decode("any", "any", date) set schema lt_catalog;
+alter function public.decode("any", "any", date, variadic "any") set schema lt_catalog;
+alter function public.decode("any", "any", time) set schema lt_catalog;
+alter function public.decode("any", "any", time, variadic "any") set schema lt_catalog;
+alter function public.decode("any", "any", timestamp) set schema lt_catalog;
+alter function public.decode("any", "any", timestamp, variadic "any") set schema lt_catalog;
+alter function public.decode("any", "any", timestamptz) set schema lt_catalog;
+alter function public.decode("any", "any", timestamptz, variadic "any") set schema lt_catalog;

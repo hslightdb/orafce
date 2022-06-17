@@ -3,30 +3,30 @@ OBJS= parse_keyword.o convert.o file.o datefce.o magic.o others.o plvstr.o plvda
 
 EXTENSION = orafce
 
-DATA = orafce--3.16.sql orafce--3.2--3.3.sql orafce--3.3--3.4.sql orafce--3.4--3.5.sql orafce--3.5--3.6.sql orafce--3.6--3.7.sql orafce--3.7--3.8.sql orafce--3.8--3.9.sql orafce--3.9--3.10.sql orafce--3.10--3.11.sql orafce--3.11--3.12.sql orafce--3.12--3.13.sql orafce--3.13--3.14.sql orafce--3.14--3.15.sql orafce--3.15--3.16.sql
+DATA = orafce--3.17.sql orafce--3.2--3.3.sql orafce--3.3--3.4.sql orafce--3.4--3.5.sql orafce--3.5--3.6.sql orafce--3.6--3.7.sql orafce--3.7--3.8.sql orafce--3.8--3.9.sql orafce--3.9--3.10.sql orafce--3.10--3.11.sql orafce--3.11--3.12.sql orafce--3.12--3.13.sql orafce--3.13--3.14.sql orafce--3.14--3.15.sql orafce--3.15--3.16.sql orafce--3.16--3.17.sql orafce--3.17--3.18.sql
 DOCS = README.asciidoc COPYRIGHT.orafce INSTALL.orafce
 
-PG_CONFIG ?= pg_config
+PG_CONFIG ?= lt_config
 
 # make "all" the default target
 all:
 
-REGRESS = orafce orafce2 dbms_output dbms_utility files varchar2 nvarchar2 aggregates nlssort dbms_random regexp_func
+REGRESS = orafce orafce2 dbms_output dbms_utility files varchar2 nvarchar2 aggregates nlssort dbms_random regexp_func view
 
 #REGRESS_OPTS = --load-language=plpgsql --schedule=parallel_schedule --encoding=utf8
 REGRESS_OPTS = --schedule=parallel_schedule --encoding=utf8
 
 #override CFLAGS += -Wextra -Wimplicit-fallthrough=0
 
-ifdef NO_PGXS
+ifdef USE_PGXS
+PG_CONFIG = lt_config
+PGXS := $(shell $(PG_CONFIG) --pgxs)
+include $(PGXS)
+else
 subdir = contrib/$(MODULE_big)
 top_builddir = ../..
 include $(top_builddir)/src/Makefile.global
 include $(top_srcdir)/contrib/contrib-global.mk
-else
-PG_CONFIG = pg_config
-PGXS := $(shell $(PG_CONFIG) --pgxs)
-include $(PGXS)
 endif
 
 ifeq ($(enable_nls), yes)

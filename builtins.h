@@ -291,4 +291,7 @@ extern PGDLLEXPORT Datum nvarchar2recv(PG_FUNCTION_ARGS);
 extern PGDLLEXPORT Datum orafce_replace_empty_strings(PG_FUNCTION_ARGS);
 extern PGDLLEXPORT Datum orafce_replace_null_strings(PG_FUNCTION_ARGS);
 
+/* lightdb add 2022/06/06 for 202204156325 */
+extern PGDLLEXPORT Datum array_indexby_length(PG_FUNCTION_ARGS);
+extern PGDLLEXPORT Datum array_indexby_delete(PG_FUNCTION_ARGS);
 #endif

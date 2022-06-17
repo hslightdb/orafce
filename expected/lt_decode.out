@@ -1,0 +1,765 @@
+--
+-- Type decode
+--
+--decode函数
+--null
+select decode(null, null, null, null, null, null);
+ decode 
+--------
+ 
+(1 row)
+
+select decode(1, null, null, null, null, 'null');
+ decode 
+--------
+ null
+(1 row)
+
+select decode(null, null, null);
+ decode 
+--------
+ 
+(1 row)
+
+select decode(1, 'x', null);
+ decode 
+--------
+ 
+(1 row)
+
+select decode(1, 1, null);
+ decode 
+--------
+ 
+(1 row)
+
+select decode(1, '1', null);
+ decode 
+--------
+ 
+(1 row)
+
+select decode('1', '1', null);
+ decode 
+--------
+ 
+(1 row)
+
+--转int4，返回int4,text
+select decode( 8, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+ decode 
+--------
+      9
+(1 row)
+
+select decode( 8, 2, 3, 4, 5, 6, 7, 8, 'abc', 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+ERROR:  invalid input syntax for type numeric: "abc"
+select decode( 8, 2, 3, 4, 5, 6, 7, 8, '012345', 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+ decode 
+--------
+  12345
+(1 row)
+
+select decode( 8, 2, 3, 4, 5, 6, 7, 8::int8, '012345', 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+ decode 
+--------
+  12345
+(1 row)
+
+select decode(8, 2, 3, 4, 5, 6, 7, '8'::text, '012345', 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+ decode 
+--------
+  12345
+(1 row)
+
+select decode( 8, 2, 3, 4, 5, 6, 7, '8'::CHAR(10), '012345', 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
+ decode 
+--------
+       
+(1 row)
+
+select decode(8, 2, 3, 4, 5, 6, 7, '8'::numeric, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
+ decode 
+--------
+      9
+(1 row)
+
+select decode(8, 2, 3, 4, 5, 6, 7, '8'::FLOAT, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
+ decode 
+--------
+      9
+(1 row)
+
+select decode(8, 2, 3, 4, 5, 6, 7, '8'::FLOAT4, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
+ decode 
+--------
+      9
+(1 row)
+
+select decode(8, 2, 3, 4, 5, 6, 7, '8'::FLOAT8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
+ decode 
+--------
+      9
+(1 row)
+
+--转float
+select decode( 0.001 , 'a', 'b', '0.001', 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( 0.001 , 'a', 'b', '0.0010', 'd', 'e', 'f');
+ decode 
+--------
+ 
+(1 row)
+
+select decode( 0.001 , 'a', 'b', '0.001', 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( 0.001 , 'a', 'b', '0.001'::FLOAT4, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( 0.001 , 'a', 'b', '0.001'::FLOAT8, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( 0.001 , 'a', 'b', '0.001'::NUMERIC, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( 0.001 , 'a', 'b', '0.001'::text, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( 0.001 , 'a', 'b', '0.001'::CHAR(10), 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+select decode( 0.001 , 'a', 'b', '0.001'::VARCHAR, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( 0.001 , 'a', 'b', '10'::int4, 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+select decode( 0.001 , 'a', 'b', '10'::int8, 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+--转text
+select decode( '0.001' , 'a', 'b', '0.001', 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001' , 'a', 'b', '0.0010', 'd', 'e', 'f');
+ decode 
+--------
+ 
+(1 row)
+
+select decode( '0.001' , 'a', 'b', '0.001', 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001' , 'a', 'b', '0.001'::FLOAT4, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001' , 'a', 'b', '0.001'::FLOAT8, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001' , 'a', 'b', '0.001'::NUMERIC, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001' , 'a', 'b', '0.001'::CHAR(10), 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+select decode( '0.001' , 'a', 'b', '0.001'::VARCHAR, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001' , 'a', 'b', '10'::int4, 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+select decode( '0.001' , 'a', 'b', '10'::int8, 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+--转varchar
+select decode( '0.001'::VARCHAR, 'a', 'b', '0.001', 'd', 'e', 'f');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001'::VARCHAR, 'a', 'b', '0.0010', 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+select decode( '0.001'::VARCHAR, 'a', 'b', '0.001'::FLOAT4, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001'::VARCHAR, 'a', 'b', '0.001'::FLOAT8, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001'::VARCHAR, 'a', 'b', '0.001'::NUMERIC, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001'::VARCHAR, 'a', 'b', '0.001'::CHAR(10), 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+select decode( '0.001'::VARCHAR, 'a', 'b', '0.001'::text, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '10'::VARCHAR, 'a', 'b', '10'::int4, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '10'::VARCHAR, 'a', 'b', '10'::int8, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+--转NUMERIC
+select decode( '0.001'::VARCHAR, 'a', 'b', '0.001', 'd', 'e', 'f');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001'::VARCHAR, 'a', 'b', '0.0010', 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+select decode( '0.001'::VARCHAR, 'a', 'b', '0.001'::FLOAT4, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001'::VARCHAR, 'a', 'b', '0.001'::FLOAT8, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '10'::VARCHAR, 'a', 'b', '010'::VARCHAR, 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+select decode( '0.001'::VARCHAR, 'a', 'b', '0.001'::CHAR(10), 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+select decode( '0.001'::VARCHAR, 'a', 'b', '0.001'::text, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '10'::VARCHAR, 'a', 'b', '10'::int4, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '10'::VARCHAR, 'a', 'b', '10'::int8, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+--转number
+select decode( '0.001'::number, 'a', 'b', '0.001', 'd', 'e', 'f');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001'::number, 'a', 'b', '0.0010', 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+select decode( '0.001'::number, 'a', 'b', '0.001'::FLOAT4, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001'::number, 'a', 'b', '0.001'::FLOAT8, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '10'::number, 'a', 'b', '010'::VARCHAR, 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+select decode( '0.001'::number, 'a', 'b', '0.001'::CHAR(10), 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+select decode( '0.001'::number, 'a', 'b', '0.001'::text, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001'::number, 'a', 'b', '0.001'::VARCHAR2, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '10'::number, 'a', 'b', '10'::int4, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '10'::number, 'a', 'b', '10'::int8, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '10'::number, 'a', 'b', '10.0'::NUMERIC, 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+--VARCHAR2
+select decode( '0.001'::VARCHAR2 , 'a', 'b', '0.001', 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001'::VARCHAR2, 'a', 'b', '0.0010', 'd', 'e', 'f');
+ decode 
+--------
+ 
+(1 row)
+
+select decode( '0.001'::VARCHAR2, 'a', 'b', '0.001', 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001'::VARCHAR2, 'a', 'b', '0.001'::FLOAT4, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001'::VARCHAR2, 'a', 'b', '0.001'::FLOAT8, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '10'::VARCHAR2, 'a', 'b', '010'::VARCHAR, 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+select decode( '0.001'::VARCHAR2, 'a', 'b', '0.001'::CHAR(10), 'd', 'e', 'f','g');
+ decode 
+--------
+ g
+(1 row)
+
+select decode( '0.001'::VARCHAR2, 'a', 'b', '0.001'::text, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001'::VARCHAR2, 'a', 'b', '0.001'::NUMERIC, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '10'::VARCHAR2, 'a', 'b', '10'::int4, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '10'::VARCHAR2, 'a', 'b', '10'::int8, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( 0.001 , 'a', 'b', '0.001'::VARCHAR2, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( 8, 2, 3, 4, 5, 6, 7, '8'::VARCHAR2, '012345', 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
+ decode 
+--------
+  12345
+(1 row)
+
+select decode( '0.001' , 'a', 'b', '0.001'::VARCHAR2, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001'::VARCHAR, 'a', 'b', '0.001'::VARCHAR2, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001'::VARCHAR, 'a', 'b', '0.001'::VARCHAR2, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+select decode( '0.001'::number, 'a', 'b', '0.001'::VARCHAR2, 'd', 'e', 'f','g');
+ decode 
+--------
+ d
+(1 row)
+
+--各个类型返回
+select decode( 8 , 'a', 'b', 'c', 'd',8, 'e'::text, 'f');
+ decode 
+--------
+ e
+(1 row)
+
+select decode( 8 , 'a', 'b', 'c', 'd',8, 'eeeeeeeeeee'::CHAR(10), 'f');
+   decode   
+------------
+ eeeeeeeeee
+(1 row)
+
+select decode( 8 , 'a', 'b', 'c', 'd',8, 'eeeeeeeeeeeeeeee'::VARCHAR2, 'f');
+      decode      
+------------------
+ eeeeeeeeeeeeeeee
+(1 row)
+
+select decode( 8 , 'a', 'b', 'c', 'd',8, 'eeee'::VARCHAR, 'f');
+ decode 
+--------
+ eeee
+(1 row)
+
+select decode( 8 , 'a', 'b', 'c', 'd',8, '00110'::int2, 'f');
+ decode 
+--------
+ 110
+(1 row)
+
+select decode( 8 , 'a', 'b', 'c', 'd',8, '00110'::int4, 'f');
+ decode 
+--------
+ 110
+(1 row)
+
+select decode( 8 , 'a', 'b', 'c', 'd',8, '00110'::int8, 'f');
+ decode 
+--------
+ 110
+(1 row)
+
+select decode( 8 , 'a', 'b', 'c', 'd',8, '00110'::NUMERIC, 'f');
+ decode 
+--------
+ 110
+(1 row)
+
+select decode( 8 , 'a', 'b', 'c', 'd',8, '00110'::FLOAT4, 'f');
+ decode 
+--------
+ 110
+(1 row)
+
+select decode( 8 , 'a', 'b', 'c', 'd',8, '00110'::FLOAT8, 'f');
+ decode 
+--------
+ 110
+(1 row)
+
+select decode( 8 , 'a', 'b', 'c', 'd',8, '00110'::NUMBER, 'f');
+ decode 
+--------
+ 110
+(1 row)
+
+--建表
+create table decodetb(a int4,b int8,c int2,d numeric(20,3),e char(10),f varchar(200));
+insert into decodetb (a,b,c,d,e,f) values (1,2,3,4,'6','60');
+insert into decodetb (a,b,c,d,e,f) values (1,2,3,4,'7','70');
+insert into decodetb (a,b,c,d,e,f) values (1,2,3,4,'8','80');
+select decode(1,f,2,3) from decodetb;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(1,a,2,3) from decodetb;
+ decode 
+--------
+      2
+      2
+      2
+(3 rows)
+
+select decode(1,b,2,3) from decodetb;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(1,c,2,3) from decodetb;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(1,d,2,3) from decodetb;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(1,f,2,3) from decodetb;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(f,1,2,3) from decodetb;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(a,1,2,3) from decodetb;
+ decode 
+--------
+      2
+      2
+      2
+(3 rows)
+
+select decode(b,1,2,3) from decodetb;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(c,1,2,3) from decodetb;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(d,1,2,3) from decodetb;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(e,1,2,3) from decodetb;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(f,1,2,3) from decodetb;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(e,1,2,3) from decodetb;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(a, b, c, d, e, f) from decodetb;
+ decode 
+--------
+     60
+     70
+     80
+(3 rows)
+
+select decode(e, e, e, e, e, e) from decodetb;
+ decode 
+--------
+ 6
+ 7
+ 8
+(3 rows)
+
+select decode(a, e, b, d, c, f) from decodetb;
+ decode 
+--------
+     60
+     70
+     80
+(3 rows)
+
+select decode(f, e, f, a, b, c) from decodetb;
+ decode 
+--------
+ 3
+ 3
+ 3
+(3 rows)
+
+select decode(e, d, a, b, c, f) from decodetb;
+ decode 
+--------
+     60
+     70
+     80
+(3 rows)
+
+insert into decodetb (a,b,c,d,e,f) values (1,2,3,4,'e','e');
+insert into decodetb (a,b,c,d,e,f) values (1,2,3,4,'eee','eee');
+select decode(a, b, c, d, e, f) from decodetb;
+ERROR:  invalid input syntax for type numeric: "e"
+select decode(e, e, e, e, e, e) from decodetb;
+ decode 
+--------
+ 6
+ 7
+ 8
+ e
+ eee
+(5 rows)
+
+select decode(a, e, b, d, c, f) from decodetb;
+ERROR:  invalid input syntax for type numeric: "e"
+select decode(f, e, f, a, b, c) from decodetb;
+ decode 
+--------
+ 3
+ 3
+ 3
+ 3
+ 3
+(5 rows)
+
+select decode(e, d, a, b, c, f) from decodetb;
+ERROR:  invalid input syntax for type numeric: "e"
+drop TABLE decodetb;

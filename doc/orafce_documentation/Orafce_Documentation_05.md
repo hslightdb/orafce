@@ -356,7 +356,7 @@ Returns the length of a string in number of bytes.
  - The data type of the return value is INTEGER.
 
 **Example**
- 
+
 ----
 
 In the following example, the number of bytes in column col2 (defined using CHAR(10)) in table t1 is returned.
@@ -1673,7 +1673,6 @@ The general rule for TO_DATE for specifying the data type format of PostgreSQL i
 
 ----
 
-
 **See**
 
 ----
@@ -1856,7 +1855,6 @@ Compares values and if they match, returns a corresponding value.
  - If the result values and default value contain a mixture of literals and non-literals, the literals will be converted to the data types of the non-literals. 
  - The same data type must be specified for all result values and for the default value. However, different data types can be specified if the data type of any of the result values or default value can be converted - these data types are listed below:
 
-
 **Data type combinations that can be converted by DECODE (summary)**
 
 <table>
@@ -1900,7 +1898,6 @@ S: Some data types can be converted
 N: Cannot be converted
 
 *1: The data types that can be converted for date/time types are listed below:
-
 
 **Result value and default value date/time data types that can be converted by DECODE**
 

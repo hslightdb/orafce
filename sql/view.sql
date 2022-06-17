@@ -1,0 +1,15 @@
+create table oracle.test_fkey(b  serial primary key);
+create table oracle.test_orafce (a  serial, b int REFERENCES test_fkey(b),primary key (a));
+select * from user_tab_columns where table_name in ('TEST_ORAFCE','PG_VIEWS') order by table_name;
+select * from user_tables where table_name in('TEST_ORAFCE','PG_VIEWS') order by table_name;
+select * from user_cons_columns where table_name in('TEST_ORAFCE','PG_VIEWS') order by table_name;
+select * from user_constraints where table_name in('TEST_ORAFCE','PG_VIEWS') order by table_name;
+select  product,version from product_component_version where product = 'orafce' order by product;
+select object_name, subject_name, object_type, created, last_ddl_time, status, namespace is null from user_objects where object_name = 'NVARCHAR2' order by object_name;
+select * from user_procedures where object_name='DECODE' order by object_name;
+select line, text, name, type from user_source where name = 'DECODE' order by name;
+select view_name from user_views where view_name = 'USER_VIEWS' order by view_name;
+select * from user_ind_columns where table_name in('TEST_ORAFCE') order by table_name;
+select owner, segment_name, segment_type, tablespace_name from dba_segments where owner='ORACLE' order by segment_name;
+drop table oracle.test_orafce;
+drop table oracle.test_fkey;

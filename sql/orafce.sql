@@ -8,6 +8,8 @@ SET client_encoding = utf8;
 -- test built-in date type oracle compatibility functions
 --
 
+set search_path to "$user",public;
+
 SELECT add_months ('2003-08-01', 3);
 SELECT add_months ('2003-08-01', -3);
 SELECT add_months ('2003-08-21', -3);
@@ -46,7 +48,7 @@ SELECT add_months ('March 21,2008 12:32:12',3);
 SELECT add_months('03/21/2008 12:32:12',3);
 SELECT add_months('20080321 123244',3);
 SELECT add_months('080321 121212',3);
-SET search_path TO default;
+SET search_path TO "$user",public;
 
 SELECT last_day(to_date('2003/03/15', 'yyyy/mm/dd'));
 SELECT last_day(to_date('2003/02/03', 'yyyy/mm/dd'));
@@ -64,7 +66,7 @@ SELECT last_day('1900-02-01 12:12:11');
 SELECT last_day('2000-02-01 121143');
 SELECT last_day('2007-02-01 12:21:33');
 SELECT last_day('2008-02-01 121212');
-SET search_path TO default;
+SET search_path TO "$user",public;
 
 SELECT next_day ('2003-08-01', 'TUESDAY');
 SELECT next_day ('2003-08-06', 'WEDNESDAY');
@@ -82,7 +84,7 @@ SELECT next_day ('2008-01-01 111343', 'sun');
 SELECT next_day ('2008-01-01 121212', 'sunAAA');
 SELECT next_day ('2008-01-01 111213', 1);
 SELECT next_day ('2008-01-01 11:12:13', 7);
-SET search_path TO default;
+SET search_path TO "$user",public;
 
 SELECT months_between (to_date ('2003/01/01', 'yyyy/mm/dd'), to_date ('2003/03/14', 'yyyy/mm/dd'));
 SELECT months_between (to_date ('2003/07/01', 'yyyy/mm/dd'), to_date ('2003/03/14', 'yyyy/mm/dd'));
@@ -104,7 +106,7 @@ SELECT months_between ('2008-01-31 11:32:11', '2008-02-29 11:12:12');
 SELECT months_between ('2008-02-29 10:11:13', '2008-03-31 10:12:11');
 SELECT months_between ('2008-02-29 111111', '2008-04-30 12:12:12');
 SELECT trunc(months_between('21-feb-2008 12:11:11', '2008-02-29 11:11:11'));
-SET search_path TO default;
+SET search_path TO "$user",public;
 
 select length('jmenuji se Pavel Stehule'),dbms_pipe.pack_message('jmenuji se Pavel Stehule');
 select length('a bydlim ve Skalici'),dbms_pipe.pack_message('a bydlim ve Skalici');
@@ -283,7 +285,14 @@ select nvl('A'::text, 'B');
 select nvl(NULL::text, 'B');
 select nvl(NULL::text, NULL);
 select nvl(1, 2);
+select nvl(1.2::numeric , 1.5::real);
+select nvl(1::integer , 1.5::real);
+select nvl('1'::text,'5'::varchar);
+select nvl('1'::text,5::bpchar);
+select nvl('1'::varchar,5::bpchar);
+select nvl('1'::bit,'11'::varbit);
 select nvl(NULL, 2);
+select nvl('a', 'b');
 select nvl2('A'::text, 'B', 'C');
 select nvl2(NULL::text, 'B', 'C');
 select nvl2('A'::text, NULL, 'C');
@@ -293,6 +302,25 @@ select nvl2(NULL, 2, 3);
 select lnnvl(true);
 select lnnvl(false);
 select lnnvl(NULL);
+
+
+
+/* The following case depence on nvl which is added by lightdb */
+/* expect is null */
+set lightdb_syntax_compatible_type to 'oracle';
+select nvl(ltrim(NULL), 'is null');
+select nvl(ltrim(''), 'is null');
+select nvl(ltrim('', 'ab'), 'is null');
+select nvl(ltrim(NULL, 'ab'), 'is null');
+select nvl(ltrim('ab', ''), 'is null');
+select nvl(ltrim('ab', NULL), 'is null');
+select nvl(ltrim('ab', 'ab'),  'is null');
+select nvl(ltrim('abc', 'a'),  'is not null'); -- return bc
+
+set lightdb_syntax_compatible_type to default;
+
+
+
 select decode(1, 1, 100, 2, 200);
 select decode(2, 1, 100, 2, 200);
 select decode(3, 1, 100, 2, 200);
@@ -659,7 +687,7 @@ select to_date('14-Jan08 11:44:49+05:30' ,'YY-MonDD HH24:MI:SS');
 select to_date('14-08Jan 11:44:49+05:30','YY-DDMon HH24:MI:SS');
 select to_date('21052014 12:13:44+05:30','DDMMYYYY HH24:MI:SS');
 select to_date('210514 12:13:44+05:30','DDMMYY HH24:MI:SS');
-SET search_path TO default;
+SET search_path TO "$user",public;
 
 -- Tests for + operator with DATE and number(smallint,integer,bigint,numeric)
 SET search_path TO oracle,"$user", public, pg_catalog;
@@ -704,7 +732,7 @@ SELECT to_date('07-02-2014 10:08:55','MM-DD-YYYY HH:MI:SS') + 9::numeric;
 SET orafce.nls_date_format='YYYY-MM-DD HH24:MI:SS';
 SELECT to_date('2014-01-01 00:00:00') + 1.5;
 SELECT to_date('2014-01-01 00:00:00','yyyy-mm-dd hh24:mi:ss') + 1.5;
-SET search_path TO default;
+SET search_path TO "$user",public;
 
 -- Tests for - operator with DATE and number(smallint,integer,bigint,numeric)
 SET search_path TO oracle,"$user", public, pg_catalog;
@@ -749,7 +777,7 @@ SELECT to_date('07-02-2014 10:08:55','MM-DD-YYYY HH:MI:SS') - 9::numeric;
 SET orafce.nls_date_format='YYYY-MM-DD HH24:MI:SS';
 SELECT to_date('2014-01-01 00:00:00') - 1.5;
 SELECT to_date('2014-01-01 00:00:00','yyyy-mm-dd hh24:mi:ss') - 1.5;
-SET search_path TO default;
+SET search_path TO "$user",public;
 
 --Tests for oracle.to_char(timestamp)-used to set the DATE output format
 SET search_path TO oracle,"$user", public, pg_catalog;
@@ -789,7 +817,7 @@ set orafce.nls_date_format='YY-MonDD HH24:MI:SS';
 select oracle.to_char(oracle.to_date('21052014 12:13:44+05:30','DDMMYYYY HH24:MI:SS'));
 set orafce.nls_date_format='DDMMYY HH24:MI:SS';
 select oracle.to_char(oracle.to_date('210514 12:13:44+05:30','DDMMYY HH24:MI:SS'));
-SET search_path TO default;
+SET search_path TO "$user",public;
 
 --Tests for oracle.-(oracle.date,oracle.date)
 SET search_path TO oracle,"$user", public, pg_catalog;
@@ -1031,3 +1059,85 @@ SELECT oracle.unistr('wrong: \+2FFFFF');
 SELECT oracle.unistr('wrong: \udb99\u0061');
 SELECT oracle.unistr('wrong: \U0000db99\U00000061');
 SELECT oracle.unistr('wrong: \U002FFFFF');
+
+
+-- more decode tests
+select decode('2012-02-01', '2012-01-01', 'result-1', '2012-02-01'::date, 'result-2');
+select decode(1, 0, '0', 1, '2012-02-01'::date, '2222');
+select decode(1, 0, 0, 1, '2012-02-01'::date, '2222');
+
+select decode(1, 1, '1'::text, 1);
+select decode(1, 1, '1', 1);
+select decode('a', 1, '1'::text, 'a', 'b');
+select decode('a', 1, '1', 'a', 'b');
+select decode('2021-01-01'::date, '2021-01-01'::text, 'ok'::text, 'a', 'b');
+select decode('2021-01-01'::date, '2021-01-01', 'ok'::text, 'a', 'b');
+
+select decode(1, 2, 3.1, 1, 2.1, 3);
+select decode(1, 2, 3, 1, 2, 3);
+select decode(1, 2, '3.1', 1, 2, 3);
+select decode('1', '2', '3', '1', '2', '3');
+select decode(1, 2, 3.1, 1, '2a', 3);
+
+select decode(null, null, null, null, null, null);
+select decode(null, null, null);
+select decode(1, 'x', null);
+select decode(1, 1, null);
+select decode(1, '1', null);
+select decode('1', '1', null);
+select decode('8'::varchar, 8, 2);
+
+select decode( 8, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+select decode( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+select decode(21, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+select decode( 8, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
+select decode( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
+select decode(21, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
+
+select decode(  8 , '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20');
+select decode( '1',  2 , '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20');
+select decode('21', '2',  3 , '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20');
+select decode( '8', '2', '3',  4 , '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21');
+select decode( '1', '2', '3', '4',  5 , '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21');
+select decode('21', '2', '3', '4', '5',  6 , '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21');
+
+select decode( '8', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20');
+select decode( '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20');
+select decode('21', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20');
+select decode( '8', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21');
+select decode( '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21');
+select decode('21', '2', '3', '4', '5',  6 , '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21');
+
+create table decodetable(a int4,b int8,c int2,d numeric(20,3),e char(10),f varchar(200));
+insert into decodetable (a,b,c,d,e,f) values (1,2,3,4,'6','60');
+insert into decodetable (a,b,c,d,e,f) values (1,2,3,4,'7','70');
+insert into decodetable (a,b,c,d,e,f) values (1,2,3,4,'8','80');
+
+select decode(1,f,2,3) from decodetable;
+select decode(1,a,2,3) from decodetable;
+select decode(1,b,2,3) from decodetable;
+select decode(1,c,2,3) from decodetable;
+select decode(1,d,2,3) from decodetable;
+select decode(f,1,2,3) from decodetable;
+select decode(e,1,2,3) from decodetable;
+select decode(a, b, c, d, e, f) from decodetable;
+select decode(e, e, e, e, e, e) from decodetable;
+select decode(a, e, b, d, c, f) from decodetable;
+select decode(f, e, f, a, b, c) from decodetable;
+select decode(e, d, a, b, c, f) from decodetable;
+
+insert into decodetable (a,b,c,d,e,f) values (1,2,3,4,'e','e');
+insert into decodetable (a,b,c,d,e,f) values (1,2,3,4,'eee','eee');
+
+select decode(1,f,2,3) from decodetable;
+select decode(1,a,2,3) from decodetable;
+select decode(1,b,2,3) from decodetable;
+select decode(1,c,2,3) from decodetable;
+select decode(1,d,2,3) from decodetable;
+select decode(f,1,2,3) from decodetable;
+select decode(e,1,2,3) from decodetable;
+select decode(a, b, c, d, e, f) from decodetable;
+select decode(e, e, e, e, e, e) from decodetable;
+select decode(a, e, b, d, c, f) from decodetable;
+select decode(f, e, f, a, b, c) from decodetable;
+select decode(e, d, a, b, c, f) from decodetable;

@@ -2,6 +2,7 @@
 --
 -- test built-in date type oracle compatibility functions
 --
+set search_path to "$user",public;
 SELECT add_months ('2003-08-01', 3);
  add_months 
 ------------
@@ -219,7 +220,7 @@ SELECT add_months('080321 121212',3);
  2008-06-21 12:12:12
 (1 row)
 
-SET search_path TO default;
+SET search_path TO "$user",public;
 SELECT last_day(to_date('2003/03/15', 'yyyy/mm/dd'));
   last_day  
 ------------
@@ -305,7 +306,7 @@ SELECT last_day('2008-02-01 121212');
  2008-02-29 12:12:12
 (1 row)
 
-SET search_path TO default;
+SET search_path TO "$user",public;
 SELECT next_day ('2003-08-01', 'TUESDAY');
   next_day  
 ------------
@@ -391,7 +392,7 @@ SELECT next_day ('2008-01-01 11:12:13', 7);
  2008-01-05 11:12:13
 (1 row)
 
-SET search_path TO default;
+SET search_path TO "$user",public;
 SELECT months_between (to_date ('2003/01/01', 'yyyy/mm/dd'), to_date ('2003/03/14', 'yyyy/mm/dd'));
   months_between   
 -------------------
@@ -501,7 +502,7 @@ SELECT trunc(months_between('21-feb-2008 12:11:11', '2008-02-29 11:11:11'));
      0
 (1 row)
 
-SET search_path TO default;
+SET search_path TO "$user",public;
 select length('jmenuji se Pavel Stehule'),dbms_pipe.pack_message('jmenuji se Pavel Stehule');
  length | pack_message 
 --------+--------------
@@ -1460,10 +1461,52 @@ select nvl(1, 2);
    1
 (1 row)
 
+select nvl(1.2::numeric , 1.5::real);
+ nvl 
+-----
+ 1.2
+(1 row)
+
+select nvl(1::integer , 1.5::real);
+ nvl 
+-----
+   1
+(1 row)
+
+select nvl('1'::text,'5'::varchar);
+ nvl 
+-----
+ 1
+(1 row)
+
+select nvl('1'::text,5::bpchar);
+ nvl 
+-----
+ 1
+(1 row)
+
+select nvl('1'::varchar,5::bpchar);
+ nvl 
+-----
+ 1
+(1 row)
+
+select nvl('1'::bit,'11'::varbit);
+ nvl 
+-----
+ 1
+(1 row)
+
 select nvl(NULL, 2);
  nvl 
 -----
    2
+(1 row)
+
+select nvl('a', 'b');
+ nvl 
+-----
+ a
 (1 row)
 
 select nvl2('A'::text, 'B', 'C');
@@ -1520,6 +1563,58 @@ select lnnvl(NULL);
  t
 (1 row)
 
+/* The following case depence on nvl which is added by lightdb */
+/* expect is null */
+set lightdb_syntax_compatible_type to 'oracle';
+select nvl(ltrim(NULL), 'is null');
+   nvl   
+---------
+ is null
+(1 row)
+
+select nvl(ltrim(''), 'is null');
+   nvl   
+---------
+ is null
+(1 row)
+
+select nvl(ltrim('', 'ab'), 'is null');
+   nvl   
+---------
+ is null
+(1 row)
+
+select nvl(ltrim(NULL, 'ab'), 'is null');
+   nvl   
+---------
+ is null
+(1 row)
+
+select nvl(ltrim('ab', ''), 'is null');
+   nvl   
+---------
+ is null
+(1 row)
+
+select nvl(ltrim('ab', NULL), 'is null');
+   nvl   
+---------
+ is null
+(1 row)
+
+select nvl(ltrim('ab', 'ab'),  'is null');
+   nvl   
+---------
+ is null
+(1 row)
+
+select nvl(ltrim('abc', 'a'),  'is not null'); -- return bc
+ nvl 
+-----
+ bc
+(1 row)
+
+set lightdb_syntax_compatible_type to default;
 select decode(1, 1, 100, 2, 200);
  decode 
 --------
@@ -3145,7 +3240,7 @@ select to_date('210514 12:13:44+05:30','DDMMYY HH24:MI:SS');
  2014-05-21 12:13:44
 (1 row)
 
-SET search_path TO default;
+SET search_path TO "$user",public;
 -- Tests for + operator with DATE and number(smallint,integer,bigint,numeric)
 SET search_path TO oracle,"$user", public, pg_catalog;
 SET orafce.nls_date_format='YYYY-MM-DD HH24:MI:SS';
@@ -3324,7 +3419,7 @@ SELECT to_date('2014-01-01 00:00:00','yyyy-mm-dd hh24:mi:ss') + 1.5;
  2014-01-02 12:00:00
 (1 row)
 
-SET search_path TO default;
+SET search_path TO "$user",public;
 -- Tests for - operator with DATE and number(smallint,integer,bigint,numeric)
 SET search_path TO oracle,"$user", public, pg_catalog;
 SET orafce.nls_date_format='YYYY-MM-DD HH24:MI:SS';
@@ -3503,7 +3598,7 @@ SELECT to_date('2014-01-01 00:00:00','yyyy-mm-dd hh24:mi:ss') - 1.5;
  2013-12-30 12:00:00
 (1 row)
 
-SET search_path TO default;
+SET search_path TO "$user",public;
 --Tests for oracle.to_char(timestamp)-used to set the DATE output format
 SET search_path TO oracle,"$user", public, pg_catalog;
 SET orafce.nls_date_format to default;
@@ -3632,7 +3727,7 @@ select oracle.to_char(oracle.to_date('210514 12:13:44+05:30','DDMMYY HH24:MI:SS'
  210514 12:13:44
 (1 row)
 
-SET search_path TO default;
+SET search_path TO "$user",public;
 --Tests for oracle.-(oracle.date,oracle.date)
 SET search_path TO oracle,"$user", public, pg_catalog;
 SELECT (to_date('2014-07-17 11:10:15', 'yyyy-mm-dd hh24:mi:ss') - to_date('2014-02-01 10:00:00', 'yyyy-mm-dd hh24:mi:ss'))::numeric(10,4);
@@ -4400,3 +4495,428 @@ SELECT oracle.unistr('wrong: \U0000db99\U00000061');
 ERROR:  invalid Unicode surrogate pair
 SELECT oracle.unistr('wrong: \U002FFFFF');
 ERROR:  invalid Unicode escape value
+-- more decode tests
+select decode('2012-02-01', '2012-01-01', 'result-1', '2012-02-01'::date, 'result-2');
+  decode  
+----------
+ result-2
+(1 row)
+
+select decode(1, 0, '0', 1, '2012-02-01'::date, '2222');
+   decode   
+------------
+ 2012-02-01
+(1 row)
+
+select decode(1, 0, 0, 1, '2012-02-01'::date, '2222');
+ERROR:  invalid input syntax for type numeric: "2012-02-01"
+select decode(1, 1, '1'::text, 1);
+ decode 
+--------
+ 1
+(1 row)
+
+select decode(1, 1, '1', 1);
+ decode 
+--------
+ 1
+(1 row)
+
+select decode('a', 1, '1'::text, 'a', 'b');
+ decode 
+--------
+ b
+(1 row)
+
+select decode('a', 1, '1', 'a', 'b');
+ decode 
+--------
+ b
+(1 row)
+
+select decode('2021-01-01'::date, '2021-01-01'::text, 'ok'::text, 'a', 'b');
+ decode 
+--------
+ ok
+(1 row)
+
+select decode('2021-01-01'::date, '2021-01-01', 'ok'::text, 'a', 'b');
+ decode 
+--------
+ ok
+(1 row)
+
+select decode(1, 2, 3.1, 1, 2.1, 3);
+ decode 
+--------
+    2.1
+(1 row)
+
+select decode(1, 2, 3, 1, 2, 3);
+ decode 
+--------
+      2
+(1 row)
+
+select decode(1, 2, '3.1', 1, 2, 3);
+ decode 
+--------
+ 2
+(1 row)
+
+select decode('1', '2', '3', '1', '2', '3');
+ decode 
+--------
+ 2
+(1 row)
+
+select decode(1, 2, 3.1, 1, '2a', 3);
+ERROR:  invalid input syntax for type numeric: "2a"
+select decode(null, null, null, null, null, null);
+ decode 
+--------
+ ***
+(1 row)
+
+select decode(null, null, null);
+ decode 
+--------
+ ***
+(1 row)
+
+select decode(1, 'x', null);
+ decode 
+--------
+ ***
+(1 row)
+
+select decode(1, 1, null);
+ decode 
+--------
+ ***
+(1 row)
+
+select decode(1, '1', null);
+ decode 
+--------
+ ***
+(1 row)
+
+select decode('1', '1', null);
+ decode 
+--------
+ ***
+(1 row)
+
+select decode('8'::varchar, 8, 2);
+ decode 
+--------
+      2
+(1 row)
+
+select decode( 8, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+ decode 
+--------
+      9
+(1 row)
+
+select decode( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+ decode 
+--------
+     20
+(1 row)
+
+select decode(21, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20);
+ decode 
+--------
+     20
+(1 row)
+
+select decode( 8, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
+ decode 
+--------
+      9
+(1 row)
+
+select decode( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
+ decode 
+--------
+    ***
+(1 row)
+
+select decode(21, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21);
+ decode 
+--------
+    ***
+(1 row)
+
+select decode(  8 , '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20');
+ decode 
+--------
+ 9
+(1 row)
+
+select decode( '1',  2 , '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20');
+ decode 
+--------
+ 20
+(1 row)
+
+select decode('21', '2',  3 , '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20');
+ decode 
+--------
+     20
+(1 row)
+
+select decode( '8', '2', '3',  4 , '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21');
+ decode 
+--------
+ 9
+(1 row)
+
+select decode( '1', '2', '3', '4',  5 , '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21');
+ decode 
+--------
+ ***
+(1 row)
+
+select decode('21', '2', '3', '4', '5',  6 , '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21');
+ decode 
+--------
+ ***
+(1 row)
+
+select decode( '8', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20');
+ decode 
+--------
+ 9
+(1 row)
+
+select decode( '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20');
+ decode 
+--------
+ 20
+(1 row)
+
+select decode('21', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20');
+ decode 
+--------
+ 20
+(1 row)
+
+select decode( '8', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21');
+ decode 
+--------
+ 9
+(1 row)
+
+select decode( '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21');
+ decode 
+--------
+ ***
+(1 row)
+
+select decode('21', '2', '3', '4', '5',  6 , '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21');
+ decode 
+--------
+ ***
+(1 row)
+
+create table decodetable(a int4,b int8,c int2,d numeric(20,3),e char(10),f varchar(200));
+insert into decodetable (a,b,c,d,e,f) values (1,2,3,4,'6','60');
+insert into decodetable (a,b,c,d,e,f) values (1,2,3,4,'7','70');
+insert into decodetable (a,b,c,d,e,f) values (1,2,3,4,'8','80');
+select decode(1,f,2,3) from decodetable;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(1,a,2,3) from decodetable;
+ decode 
+--------
+      2
+      2
+      2
+(3 rows)
+
+select decode(1,b,2,3) from decodetable;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(1,c,2,3) from decodetable;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(1,d,2,3) from decodetable;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(f,1,2,3) from decodetable;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(e,1,2,3) from decodetable;
+ decode 
+--------
+      3
+      3
+      3
+(3 rows)
+
+select decode(a, b, c, d, e, f) from decodetable;
+ decode 
+--------
+     60
+     70
+     80
+(3 rows)
+
+select decode(e, e, e, e, e, e) from decodetable;
+ decode 
+--------
+ 6
+ 7
+ 8
+(3 rows)
+
+select decode(a, e, b, d, c, f) from decodetable;
+ decode 
+--------
+     60
+     70
+     80
+(3 rows)
+
+select decode(f, e, f, a, b, c) from decodetable;
+ decode 
+--------
+ 3
+ 3
+ 3
+(3 rows)
+
+select decode(e, d, a, b, c, f) from decodetable;
+ decode 
+--------
+     60
+     70
+     80
+(3 rows)
+
+insert into decodetable (a,b,c,d,e,f) values (1,2,3,4,'e','e');
+insert into decodetable (a,b,c,d,e,f) values (1,2,3,4,'eee','eee');
+select decode(1,f,2,3) from decodetable;
+ decode 
+--------
+      3
+      3
+      3
+      3
+      3
+(5 rows)
+
+select decode(1,a,2,3) from decodetable;
+ decode 
+--------
+      2
+      2
+      2
+      2
+      2
+(5 rows)
+
+select decode(1,b,2,3) from decodetable;
+ decode 
+--------
+      3
+      3
+      3
+      3
+      3
+(5 rows)
+
+select decode(1,c,2,3) from decodetable;
+ decode 
+--------
+      3
+      3
+      3
+      3
+      3
+(5 rows)
+
+select decode(1,d,2,3) from decodetable;
+ decode 
+--------
+      3
+      3
+      3
+      3
+      3
+(5 rows)
+
+select decode(f,1,2,3) from decodetable;
+ decode 
+--------
+      3
+      3
+      3
+      3
+      3
+(5 rows)
+
+select decode(e,1,2,3) from decodetable;
+ decode 
+--------
+      3
+      3
+      3
+      3
+      3
+(5 rows)
+
+select decode(a, b, c, d, e, f) from decodetable;
+ERROR:  invalid input syntax for type numeric: "e"
+select decode(e, e, e, e, e, e) from decodetable;
+ decode 
+--------
+ 6
+ 7
+ 8
+ e
+ eee
+(5 rows)
+
+select decode(a, e, b, d, c, f) from decodetable;
+ERROR:  invalid input syntax for type numeric: "e"
+select decode(f, e, f, a, b, c) from decodetable;
+ decode 
+--------
+ 3
+ 3
+ 3
+ 3
+ 3
+(5 rows)
+
+select decode(e, d, a, b, c, f) from decodetable;
+ERROR:  invalid input syntax for type numeric: "e"

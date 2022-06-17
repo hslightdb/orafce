@@ -1,0 +1,386 @@
+DROP TABLE IF EXISTS lt_listagg_t;
+NOTICE:  table "lt_listagg_t" does not exist, skipping
+create table lt_listagg_t (a int, b varchar(10));
+insert into lt_listagg_t values (1, 'c');
+insert into lt_listagg_t values (2, 'd');
+insert into lt_listagg_t values (2, 'a');
+insert into lt_listagg_t values (3, 'w');
+insert into lt_listagg_t values (3, 'win10');
+insert into lt_listagg_t values (3, 'win11');
+insert into lt_listagg_t values (4, 'k');
+insert into lt_listagg_t values (4, 'a');
+insert into lt_listagg_t values (1, 'a');
+insert into lt_listagg_t values (2, 'a');
+insert into lt_listagg_t values (4, 'c');
+insert into lt_listagg_t values (4, 'k');
+insert into lt_listagg_t values (4, 'k');
+insert into lt_listagg_t values (4, 'kitty');
+insert into lt_listagg_t values (4, 'kitty');
+insert into lt_listagg_t values (1, 'apple');
+insert into lt_listagg_t values (2, 'apple');
+insert into lt_listagg_t values (1, 'zip');
+insert into lt_listagg_t values (2, 'zip');
+
+SELECT LISTAGG(t.b, ',') FROM lt_listagg_t t;
+                              listagg                              
+-------------------------------------------------------------------
+ c,d,a,w,win10,win11,k,a,a,a,c,k,k,kitty,kitty,apple,apple,zip,zip
+(1 row)
+
+SELECT LISTAGG(DISTINCT t.b, ',') FROM lt_listagg_t t;
+                listagg                
+---------------------------------------
+ a,apple,c,d,k,kitty,w,win10,win11,zip
+(1 row)
+
+SELECT LISTAGG(t.b, ',') FROM lt_listagg_t t GROUP BY t.a;
+        listagg        
+-----------------------
+ w,win10,win11
+ k,a,c,k,k,kitty,kitty
+ d,a,a,apple,zip
+ c,a,apple,zip
+(4 rows)
+
+
+--WARNING 
+--SELECT LISTAGG(t.b, ',') FROM lt_listagg_t t;
+--Although the result is right, the order of the results is inconsistent
+SELECT LISTAGG(t.b, ',') WITHIN GROUP (ORDER BY t.a) FROM lt_listagg_t t GROUP BY t.a;
+        listagg        
+-----------------------
+ zip,apple,a,c
+ zip,d,a,a,apple
+ w,win11,win10
+ k,kitty,kitty,a,k,c,k
+(4 rows)
+
+
+SELECT LISTAGG(t.b, ',') WITHIN GROUP (ORDER BY t.b) FROM lt_listagg_t t GROUP BY t.a;
+        listagg        
+-----------------------
+ a,apple,c,zip
+ a,a,apple,d,zip
+ w,win10,win11
+ a,c,k,k,k,kitty,kitty
+(4 rows)
+
+SELECT LISTAGG(DISTINCT t.b, ',') WITHIN GROUP (ORDER BY t.b) FROM lt_listagg_t t GROUP BY t.a;
+    listagg    
+---------------
+ a,apple,c,zip
+ a,apple,d,zip
+ w,win10,win11
+ a,c,k,kitty
+(4 rows)
+
+SELECT LISTAGG(t.b, ',') WITHIN GROUP (ORDER BY t.a,t.b) FROM lt_listagg_t t GROUP BY t.a;
+        listagg        
+-----------------------
+ a,apple,c,zip
+ a,a,apple,d,zip
+ w,win10,win11
+ a,c,k,k,k,kitty,kitty
+(4 rows)
+
+SELECT LISTAGG(t.b, ',') WITHIN GROUP (ORDER BY t.a,t.b desc) FROM lt_listagg_t t GROUP BY t.a;
+        listagg        
+-----------------------
+ zip,c,apple,a
+ zip,d,apple,a,a
+ win11,win10,w
+ kitty,kitty,k,k,k,c,a
+(4 rows)
+
+SELECT LISTAGG(t.b, ',') FROM lt_listagg_t t GROUP BY t.b;
+   listagg   
+-------------
+ kitty,kitty
+ zip,zip
+ d
+ a,a,a,a
+ win10
+ win11
+ w
+ k,k,k
+ c,c
+ apple,apple
+(10 rows)
+
+SELECT LISTAGG(t.b, ',') FROM lt_listagg_t t GROUP BY t.a,t.b;
+   listagg   
+-------------
+ a
+ c
+ apple
+ w
+ c
+ a,a
+ zip
+ k,k,k
+ win10
+ zip
+ d
+ apple
+ a
+ kitty,kitty
+ win11
+(15 rows)
+
+SELECT LISTAGG(t.b, ',') WITHIN GROUP (ORDER BY t.a) FROM lt_listagg_t t GROUP BY t.a,t.b;
+   listagg   
+-------------
+ a
+ apple
+ c
+ zip
+ a,a
+ apple
+ d
+ zip
+ w
+ win10
+ win11
+ a
+ c
+ k,k,k
+ kitty,kitty
+(15 rows)
+
+SELECT LISTAGG(t.b, ',') WITHIN GROUP (ORDER BY t.a,t.b desc) FROM lt_listagg_t t GROUP BY t.a,t.b;
+   listagg   
+-------------
+ a
+ apple
+ c
+ zip
+ a,a
+ apple
+ d
+ zip
+ w
+ win10
+ win11
+ a
+ c
+ k,k,k
+ kitty,kitty
+(15 rows)
+
+SELECT t.a,LISTAGG(t.b, ',') FROM lt_listagg_t t GROUP BY t.a;
+ a |        listagg        
+---+-----------------------
+ 3 | w,win10,win11
+ 4 | k,a,c,k,k,kitty,kitty
+ 2 | d,a,a,apple,zip
+ 1 | c,a,apple,zip
+(4 rows)
+
+SELECT t.a,LISTAGG(t.b, ',') FROM lt_listagg_t t GROUP BY t.a,t.b;
+ a |   listagg   
+---+-------------
+ 1 | a
+ 1 | c
+ 1 | apple
+ 3 | w
+ 4 | c
+ 2 | a,a
+ 2 | zip
+ 4 | k,k,k
+ 3 | win10
+ 1 | zip
+ 2 | d
+ 2 | apple
+ 4 | a
+ 4 | kitty,kitty
+ 3 | win11
+(15 rows)
+
+SELECT t.a,LISTAGG(t.b, ',') WITHIN GROUP (ORDER BY t.b) FROM lt_listagg_t t GROUP BY t.a;
+ a |        listagg        
+---+-----------------------
+ 1 | a,apple,c,zip
+ 2 | a,a,apple,d,zip
+ 3 | w,win10,win11
+ 4 | a,c,k,k,k,kitty,kitty
+(4 rows)
+
+SELECT t.a,LISTAGG(t.b, ',') WITHIN GROUP (ORDER BY t.b DESC) FROM lt_listagg_t t GROUP BY t.a;
+ a |        listagg        
+---+-----------------------
+ 1 | zip,c,apple,a
+ 2 | zip,d,apple,a,a
+ 3 | win11,win10,w
+ 4 | kitty,kitty,k,k,k,c,a
+(4 rows)
+
+SELECT t.a,LISTAGG(t.b, ',') WITHIN GROUP (ORDER BY t.a) FROM lt_listagg_t t GROUP BY t.a,t.b;
+ a |   listagg   
+---+-------------
+ 1 | a
+ 1 | apple
+ 1 | c
+ 1 | zip
+ 2 | a,a
+ 2 | apple
+ 2 | d
+ 2 | zip
+ 3 | w
+ 3 | win10
+ 3 | win11
+ 4 | a
+ 4 | c
+ 4 | k,k,k
+ 4 | kitty,kitty
+(15 rows)
+
+SELECT t.a,LISTAGG(t.b, ',') WITHIN GROUP (ORDER BY t.b) FROM lt_listagg_t t GROUP BY t.a,t.b;
+ a |   listagg   
+---+-------------
+ 1 | a
+ 1 | apple
+ 1 | c
+ 1 | zip
+ 2 | a,a
+ 2 | apple
+ 2 | d
+ 2 | zip
+ 3 | w
+ 3 | win10
+ 3 | win11
+ 4 | a
+ 4 | c
+ 4 | k,k,k
+ 4 | kitty,kitty
+(15 rows)
+
+SELECT t.a,LISTAGG(t.b, ',') WITHIN GROUP (ORDER BY t.a,t.b) FROM lt_listagg_t t GROUP BY t.a,t.b;
+ a |   listagg   
+---+-------------
+ 1 | a
+ 1 | apple
+ 1 | c
+ 1 | zip
+ 2 | a,a
+ 2 | apple
+ 2 | d
+ 2 | zip
+ 3 | w
+ 3 | win10
+ 3 | win11
+ 4 | a
+ 4 | c
+ 4 | k,k,k
+ 4 | kitty,kitty
+(15 rows)
+
+SELECT t.a,LISTAGG(DISTINCT t.b, ',') WITHIN GROUP (ORDER BY t.b) FROM lt_listagg_t t GROUP BY t.a;
+ a |    listagg    
+---+---------------
+ 1 | a,apple,c,zip
+ 2 | a,apple,d,zip
+ 3 | w,win10,win11
+ 4 | a,c,k,kitty
+(4 rows)
+
+SELECT t.a,LISTAGG(DISTINCT t.b, ',') WITHIN GROUP (ORDER BY t.b DESC) FROM lt_listagg_t t GROUP BY t.a;
+ a |    listagg    
+---+---------------
+ 1 | zip,c,apple,a
+ 2 | zip,d,apple,a
+ 3 | win11,win10,w
+ 4 | kitty,k,c,a
+(4 rows)
+
+SELECT t.a,LISTAGG(DISTINCT t.b, ',') WITHIN GROUP (ORDER BY t.b) FROM lt_listagg_t t GROUP BY t.a ORDER BY t.a DESC;
+ a |    listagg    
+---+---------------
+ 4 | a,c,k,kitty
+ 3 | w,win10,win11
+ 2 | a,apple,d,zip
+ 1 | a,apple,c,zip
+(4 rows)
+
+SELECT t.a,LISTAGG(DISTINCT t.b, ',') WITHIN GROUP (ORDER BY t.b DESC) FROM lt_listagg_t t GROUP BY t.a ORDER BY t.a DESC;
+ a |    listagg    
+---+---------------
+ 4 | kitty,k,c,a
+ 3 | win11,win10,w
+ 2 | zip,d,apple,a
+ 1 | zip,c,apple,a
+(4 rows)
+
+SELECT t.a,LISTAGG(DISTINCT t.b, ',') WITHIN GROUP (ORDER BY t.b DESC) FROM lt_listagg_t t GROUP BY t.a,t.b ORDER BY t.a DESC;
+ a | listagg 
+---+---------
+ 4 | a
+ 4 | c
+ 4 | k
+ 4 | kitty
+ 3 | w
+ 3 | win10
+ 3 | win11
+ 2 | a
+ 2 | apple
+ 2 | d
+ 2 | zip
+ 1 | a
+ 1 | apple
+ 1 | c
+ 1 | zip
+(15 rows)
+
+SELECT t.a,LISTAGG(t.b, '<'||'>') FROM lt_listagg_t t GROUP BY t.a;
+ a |           listagg           
+---+-----------------------------
+ 3 | w<>win10<>win11
+ 4 | k<>a<>c<>k<>k<>kitty<>kitty
+ 2 | d<>a<>a<>apple<>zip
+ 1 | c<>a<>apple<>zip
+(4 rows)
+
+
+--error
+--select a must group by a
+SELECT t.a,LISTAGG(t.b, ',') FROM lt_listagg_t t;
+ERROR:  column "t.a" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: SELECT t.a,LISTAGG(t.b, ',') FROM lt_listagg_t t;
+               ^
+--select a must group by a
+SELECT t.a,LISTAGG(t.b, ',') FROM lt_listagg_t t GROUP BY t.b;
+ERROR:  column "t.a" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: SELECT t.a,LISTAGG(t.b, ',') FROM lt_listagg_t t GROUP BY t....
+               ^
+--listagg cannot exceed 2 Parameters
+SELECT t.a,LISTAGG(t.b,t.a, ',') FROM lt_listagg_t t GROUP BY t.a;
+ERROR:  function listagg(character varying, integer, unknown) does not exist
+LINE 1: SELECT t.a,LISTAGG(t.b,t.a, ',') FROM lt_listagg_t t GROUP B...
+                   ^
+HINT:  No function matches the given name and argument types. You might need to add explicit type casts.
+--order by a not take effect
+SELECT t.a,LISTAGG(t.b, ',') WITHIN GROUP (ORDER BY t.a desc) FROM lt_listagg_t t GROUP BY t.a;
+ a |        listagg        
+---+-----------------------
+ 1 | zip,apple,a,c
+ 2 | zip,d,a,a,apple
+ 3 | w,win11,win10
+ 4 | k,kitty,kitty,a,k,c,k
+(4 rows)
+
+--order by a not take effect
+SELECT t.a,LISTAGG(t.b, ',') WITHIN GROUP (ORDER BY t.a,t.b desc) FROM lt_listagg_t t GROUP BY t.a;
+ a |        listagg        
+---+-----------------------
+ 1 | zip,c,apple,a
+ 2 | zip,d,apple,a,a
+ 3 | win11,win10,w
+ 4 | kitty,kitty,k,k,k,c,a
+(4 rows)
+
+--DISTINCT and ORDER BY need one-to-one correspondence
+SELECT t.a,LISTAGG(DISTINCT t.b, ',') WITHIN GROUP (ORDER BY t.a,t.b DESC) FROM lt_listagg_t t GROUP BY t.a,t.b;
+ERROR:  in an aggregate with DISTINCT, ORDER BY expressions must appear in argument list
+LINE 1: ...LISTAGG(DISTINCT t.b, ',') WITHIN GROUP (ORDER BY t.a,t.b DE...
+                                                             ^
+
+DROP TABLE IF EXISTS lt_listagg_t;
